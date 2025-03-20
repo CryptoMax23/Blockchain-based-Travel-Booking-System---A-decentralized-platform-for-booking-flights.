@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blockchain Travel Booking</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.7.4/web3.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        .container { max-width: 600px; margin: auto; }
+        input, button { margin: 10px; padding: 8px; }
+    </style>
+</head>
+<body>
+    <h1>Blockchain Travel Booking System</h1>
+    <div class="container">
+        <h2>Book a Flight</h2>
+        <input type="text" id="flightDetails" placeholder="Flight Details">
+        <input type="number" id="flightAmount" placeholder="Amount in Wei">
+        <button onclick="bookFlight()">Book Flight</button>
+        
+        <h2>Book a Hotel</h2>
+        <input type="text" id="hotelDetails" placeholder="Hotel Details">
+        <input type="number" id="hotelAmount" placeholder="Amount in Wei">
+        <button onclick="bookHotel()">Book Hotel</button>
+
+        <h2>Check Booking</h2>
+        <input type="number" id="bookingId" placeholder="Booking ID">
+        <button onclick="getBookingDetails()">Get Booking Details</button>
+        <p id="bookingInfo"></p>
+    </div>
+
+    <script>
+        const contractAddress = "YOUR_SMART_CONTRACT_ADDRESS"; // Replace with deployed contract address
+        const contractABI = [ /* Add your ABI here */ ];
+        let web3, contract;
+
+        async function init() {
+            if (window.ethereum) {
+                web3 = new Web3(window.ethereum);
+                await window.ethereum.request({ method: "eth_requestAccounts" });
+                const accounts = await web3.eth.getAccounts();
+                contract = new web3.eth.Contract(contractABI, contractAddress);
+                console.log("Connected to contract", contract);
+            } else {
+                alert("Please install MetaMask!");
+            }
+        }
+        
+        async function bookFlight() {
+            const details = document.getElementById("flightDetails").value;
+            const amount = document.getElementById("flightAmount").value;
+            const accounts = await web3.eth.getAccounts();
+            await contract.methods.bookFlight(details, amount).send({ from: accounts[0] });
+            alert("Flight booked successfully!");
+        }
+
+        async function bookHotel() {
+            const details = document.getElementById("hotelDetails").value;
+            const amount = document.getElementById("hotelAmount").value;
+            const accounts = await web3.eth.getAccounts();
+            await contract.methods.bookHotel(details, amount).send({ from: accounts[0] });
+            alert("Hotel booked successfully!");
+        }
+
+        async function getBookingDetails() {
+            const bookingId = document.getElementById("bookingId").value;
+            const booking = await contract.methods.getBookingDetails(bookingId).call();
+            document.getElementById("bookingInfo").innerText = `User: ${booking.user}, Type: ${booking.bookingType}, Amount: ${booking.amount}`;
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
